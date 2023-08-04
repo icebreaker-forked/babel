@@ -680,6 +680,7 @@ export interface ObjectProperty extends BaseNode {
 }
 
 // function a (...rest){}
+// const { b,...c } = a
 // 函数参数展开
 export interface RestElement extends BaseNode {
   type: "RestElement";
@@ -938,6 +939,7 @@ export interface ForOfStatement extends BaseNode {
   await: boolean;
 }
 
+// import a from 'xxxx'
 export interface ImportDeclaration extends BaseNode {
   type: "ImportDeclaration";
   specifiers: Array<
@@ -949,30 +951,35 @@ export interface ImportDeclaration extends BaseNode {
   importKind?: "type" | "typeof" | "value" | null;
   module?: boolean | null;
 }
-
+// import a from 'xxxx'
+// 默认导入方式
 export interface ImportDefaultSpecifier extends BaseNode {
   type: "ImportDefaultSpecifier";
   local: Identifier;
 }
-
+// import  * as bar from 'baz';
 export interface ImportNamespaceSpecifier extends BaseNode {
   type: "ImportNamespaceSpecifier";
   local: Identifier;
 }
-
+// import {xx as xxx} from 'xxxx'
 export interface ImportSpecifier extends BaseNode {
   type: "ImportSpecifier";
   local: Identifier;
   imported: Identifier | StringLiteral;
   importKind?: "type" | "typeof" | "value" | null;
 }
-
+// const x = new.target;
 export interface MetaProperty extends BaseNode {
   type: "MetaProperty";
   meta: Identifier;
   property: Identifier;
 }
 
+// class a {
+// 	x(){
+//     }
+// }
 export interface ClassMethod extends BaseNode {
   type: "ClassMethod";
   kind: "get" | "set" | "method" | "constructor";
@@ -996,7 +1003,7 @@ export interface ClassMethod extends BaseNode {
   | Noop
   | null;
 }
-
+// const { b } = a
 export interface ObjectPattern extends BaseNode {
   type: "ObjectPattern";
   properties: Array<RestElement | ObjectProperty>;
@@ -1004,7 +1011,8 @@ export interface ObjectPattern extends BaseNode {
   optional?: boolean | null;
   typeAnnotation?: TypeAnnotation | TSTypeAnnotation | Noop | null;
 }
-
+// [...a,];
+// const {...v} = {...b} 的右边部分，这个放在 Pattern 里是聚，散就是  Spread
 export interface SpreadElement extends BaseNode {
   type: "SpreadElement";
   argument: Expression;
@@ -1018,10 +1026,16 @@ export interface SpreadProperty extends BaseNode {
   argument: Expression;
 }
 
+// class a extends b{
+//   constructor(){
+//     super() <- 关键字
+//   }
+// }
 export interface Super extends BaseNode {
   type: "Super";
 }
-
+// raw`42`
+// String.raw`42`
 export interface TaggedTemplateExpression extends BaseNode {
   type: "TaggedTemplateExpression";
   tag: Expression;
@@ -1031,30 +1045,38 @@ export interface TaggedTemplateExpression extends BaseNode {
   | TSTypeParameterInstantiation
   | null;
 }
-
+// `4${a}2`
 export interface TemplateElement extends BaseNode {
   type: "TemplateElement";
   value: { raw: string; cooked?: string };
   tail: boolean;
 }
-
+// `23456789`
+// 包含多个 TemplateElement
 export interface TemplateLiteral extends BaseNode {
   type: "TemplateLiteral";
   quasis: Array<TemplateElement>;
   expressions: Array<Expression | TSType>;
 }
 
+// function* a (){
+//   yield
+//   }
 export interface YieldExpression extends BaseNode {
   type: "YieldExpression";
   argument?: Expression | null;
   delegate: boolean;
 }
 
+// async function a (){
+// 	await a
+// }
+// 要检测对应的 FunctionDeclaration async 标志位 是否为 true
 export interface AwaitExpression extends BaseNode {
   type: "AwaitExpression";
   argument: Expression;
 }
-
+// import('xx') 关键字
 export interface Import extends BaseNode {
   type: "Import";
 }
@@ -1064,11 +1086,14 @@ export interface BigIntLiteral extends BaseNode {
   value: string;
 }
 
+
+// export * as default from "foo";
+// 核心就是 * as default
 export interface ExportNamespaceSpecifier extends BaseNode {
   type: "ExportNamespaceSpecifier";
   exported: Identifier;
 }
-
+// a?.s
 export interface OptionalMemberExpression extends BaseNode {
   type: "OptionalMemberExpression";
   object: Expression;
@@ -1076,7 +1101,7 @@ export interface OptionalMemberExpression extends BaseNode {
   computed: boolean;
   optional: boolean;
 }
-
+// a?.s()
 export interface OptionalCallExpression extends BaseNode {
   type: "OptionalCallExpression";
   callee: Expression;
@@ -1088,6 +1113,9 @@ export interface OptionalCallExpression extends BaseNode {
   typeParameters?: TSTypeParameterInstantiation | null;
 }
 
+// class a{
+//   a =1
+//  }
 export interface ClassProperty extends BaseNode {
   type: "ClassProperty";
   key: Identifier | StringLiteral | NumericLiteral | BigIntLiteral | Expression;
@@ -1105,7 +1133,10 @@ export interface ClassProperty extends BaseNode {
   readonly?: boolean | null;
   variance?: Variance | null;
 }
-
+// class Foo {
+//   accessor constructor;
+// }
+// 这是啥？？？
 export interface ClassAccessorProperty extends BaseNode {
   type: "ClassAccessorProperty";
   key:
@@ -1130,6 +1161,10 @@ export interface ClassAccessorProperty extends BaseNode {
   variance?: Variance | null;
 }
 
+// class Foo {
+//   #aa = 32
+// }
+// 不喜欢这个语法？
 export interface ClassPrivateProperty extends BaseNode {
   type: "ClassPrivateProperty";
   key: PrivateName;
